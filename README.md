@@ -102,6 +102,8 @@ The rules apply path filtering by directory convention (`/src/`, `/bundles/`, `/
 
 **PHPStan-tag carve-out.** Doc-blocks that contain `@param` / `@return` / `@var` / `@template*` / `@phpstan-*` / `@psalm-*` / `@throws` tags survive — the rule extracts only the tag lines and drops every prose line. Inline `// @phpstan-ignore-next-line` line comments survive for the same reason. This preserves type-narrowing annotations PHPStan depends on without leaving any prose behind.
 
+**Property `@var`.** On a property, `@var` survives only where the native type cannot carry the element type: a `private` or `protected` property typed `array` / `?array` (and `Collection` / `ArrayCollection` under `src/Entity/`). A `public` property keeps no `@var` — expose a typed method instead of a public array.
+
 ```php
 // BAD
 final class Foo

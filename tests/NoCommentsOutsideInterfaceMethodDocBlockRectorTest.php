@@ -338,6 +338,34 @@ final class NoCommentsOutsideInterfaceMethodDocBlockRectorTest extends TestCase
         self::assertStringContainsString('@var array<string, int>', $printed);
     }
 
+    public function testPropertyVarDocBlockOnProtectedArrayPropertyIsPreserved(): void
+    {
+        $printed = $this->refactorSnippet(<<<'PHP'
+            <?php
+            namespace Foo;
+            abstract class Base {
+                /** @var list<array<string, mixed>> */
+                protected array $messages = [];
+            }
+            PHP);
+
+        self::assertStringContainsString('@var list<array<string, mixed>>', $printed);
+    }
+
+    public function testPropertyVarDocBlockOnProtectedStringPropertyIsStripped(): void
+    {
+        $printed = $this->refactorSnippet(<<<'PHP'
+            <?php
+            namespace Foo;
+            abstract class Base {
+                /** @var non-empty-string */
+                protected string $token = 'x';
+            }
+            PHP);
+
+        self::assertStringNotContainsString('@var', $printed);
+    }
+
     public function testPropertyVarDocBlockOnPublicPropertyIsStripped(): void
     {
         $printed = $this->refactorSnippet(<<<'PHP'
@@ -396,6 +424,24 @@ final class NoCommentsOutsideInterfaceMethodDocBlockRectorTest extends TestCase
         self::assertFalse(NoCommentsOutsideInterfaceMethodDocBlockRector::isPrivateTypedArrayProperty($properties[2]));
         self::assertFalse(NoCommentsOutsideInterfaceMethodDocBlockRector::isPrivateTypedArrayProperty($properties[3]));
         self::assertTrue(NoCommentsOutsideInterfaceMethodDocBlockRector::isPrivateTypedArrayProperty($properties[4]));
+    }
+
+    public function testIsNonPublicTypedArrayPropertyMatchesPrivateAndProtectedArraysOnly(): void
+    {
+        $parser = (new ParserFactory())->createForNewestSupportedVersion();
+        $stmts  = $parser->parse('<?php namespace Foo; abstract class X { private array $a = []; protected ?array $b = null; public array $c = []; protected string $d = ""; protected array $e = []; }');
+        self::assertNotNull($stmts);
+        $class = $stmts[0]->stmts[0] ?? null;
+        self::assertInstanceOf(Class_::class, $class);
+
+        $properties = array_values(array_filter($class->stmts, static fn(Stmt $s): bool => $s instanceof Property));
+        self::assertCount(5, $properties);
+
+        self::assertTrue(NoCommentsOutsideInterfaceMethodDocBlockRector::isNonPublicTypedArrayProperty($properties[0]));
+        self::assertTrue(NoCommentsOutsideInterfaceMethodDocBlockRector::isNonPublicTypedArrayProperty($properties[1]));
+        self::assertFalse(NoCommentsOutsideInterfaceMethodDocBlockRector::isNonPublicTypedArrayProperty($properties[2]));
+        self::assertFalse(NoCommentsOutsideInterfaceMethodDocBlockRector::isNonPublicTypedArrayProperty($properties[3]));
+        self::assertTrue(NoCommentsOutsideInterfaceMethodDocBlockRector::isNonPublicTypedArrayProperty($properties[4]));
     }
 
     public function testIsCollectionPropertyMatchesCollectionAndArrayCollection(): void

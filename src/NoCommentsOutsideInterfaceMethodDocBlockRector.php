@@ -171,7 +171,7 @@ final class NoCommentsOutsideInterfaceMethodDocBlockRector extends AbstractRecto
                 $allowVar = $member instanceof Property
                     && (
                         ($isEntityFile && self::isCollectionProperty($member))
-                        || self::isPrivateTypedArrayProperty($member)
+                        || self::isNonPublicTypedArrayProperty($member)
                     );
                 $allowlist = $allowVar
                     ? self::ENTITY_PROPERTY_TAGS_ALLOWLIST
@@ -339,6 +339,19 @@ final class NoCommentsOutsideInterfaceMethodDocBlockRector extends AbstractRecto
     public static function isPrivateTypedArrayProperty(Property $property): bool
     {
         if (0 === ($property->flags & Class_::MODIFIER_PRIVATE)) {
+            return false;
+        }
+        $type = $property->type;
+        if ($type instanceof NullableType) {
+            $type = $type->type;
+        }
+
+        return $type instanceof Identifier && 'array' === $type->name;
+    }
+
+    public static function isNonPublicTypedArrayProperty(Property $property): bool
+    {
+        if (0 === ($property->flags & (Class_::MODIFIER_PRIVATE | Class_::MODIFIER_PROTECTED))) {
             return false;
         }
         $type = $property->type;
