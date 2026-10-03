@@ -176,7 +176,6 @@ final class NoSilentFallbackRectorTest extends TestCase
     }
 
     /**
-     * @param  mixed                $value
      * @return array<int, Comment>
      */
     private function ensureCommentList(mixed $value): array

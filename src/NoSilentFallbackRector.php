@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Amashukov\RectorRules;
 
+use PhpParser\Node\Expr;
 use PhpParser\Comment;
 use PhpParser\Node;
 use PhpParser\Node\Expr\AssignOp\Coalesce as CoalesceAssign;
@@ -98,7 +99,7 @@ final class NoSilentFallbackRector extends AbstractRector
         }
 
         if ($node instanceof Ternary) {
-            if ($node->if === null) {
+            if (!$node->if instanceof Expr) {
                 return $this->mark($node, self::BAN_SHORT_TERNARY);
             }
 
@@ -117,16 +118,9 @@ final class NoSilentFallbackRector extends AbstractRector
         if ($inner instanceof Isset_) {
             return true;
         }
-
-        if (
-            $inner instanceof FuncCall
-            && $inner->name instanceof Name
-            && $inner->name->toString() === 'array_key_exists'
-        ) {
-            return true;
-        }
-
-        return false;
+        return $inner instanceof FuncCall
+        && $inner->name instanceof Name
+        && $inner->name->toString() === 'array_key_exists';
     }
 
     private function mark(Node $node, string $bannerText): Node

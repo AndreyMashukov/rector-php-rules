@@ -156,7 +156,7 @@ final class YamlCommentStripperTest extends TestCase
 
     public function testStripFileRewritesDirtyFile(): void
     {
-        $path = self::tempYamlFile("# header\nfoo: 1 # tail\n");
+        $path = $this->tempYamlFile("# header\nfoo: 1 # tail\n");
 
         try {
             $stripper = new YamlCommentStripper();
@@ -171,7 +171,7 @@ final class YamlCommentStripperTest extends TestCase
 
     public function testStripFileDoesNotTouchCleanFile(): void
     {
-        $path     = self::tempYamlFile("foo: 1\nbar: 2\n");
+        $path     = $this->tempYamlFile("foo: 1\nbar: 2\n");
         $original = \file_get_contents($path);
         \clearstatcache(true, $path);
         $mtimeBefore = \filemtime($path);
@@ -228,7 +228,7 @@ final class YamlCommentStripperTest extends TestCase
         self::assertSame($changes, $count);
     }
 
-    private static function tempYamlFile(string $contents): string
+    private function tempYamlFile(string $contents): string
     {
         $tmp = \tempnam(\sys_get_temp_dir(), 'yaml-strip-');
         self::assertIsString($tmp);

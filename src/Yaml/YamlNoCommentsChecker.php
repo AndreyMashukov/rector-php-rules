@@ -47,7 +47,7 @@ final class YamlNoCommentsChecker implements YamlNoCommentsCheckerInterface
      */
     public function check(array $paths, ?array $extensionsOverride = null): array
     {
-        $effectiveExtensions = $extensionsOverride === null ? $this->extensions : $extensionsOverride;
+        $effectiveExtensions = $extensionsOverride ?? $this->extensions;
         $files               = $this->collectFiles($paths, $effectiveExtensions);
         $findings = [];
 
@@ -93,7 +93,7 @@ final class YamlNoCommentsChecker implements YamlNoCommentsCheckerInterface
         foreach ($lines as $lineIndex => $line) {
             $finding = $this->scanLine($line, $lineIndex + 1, $sourceLabel);
 
-            if ($finding !== null) {
+            if ($finding instanceof YamlComment) {
                 $findings[] = $finding;
             }
         }

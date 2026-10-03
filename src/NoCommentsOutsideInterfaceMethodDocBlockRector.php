@@ -7,14 +7,10 @@ namespace Amashukov\RectorRules;
 use PhpParser\Node\NullableType;
 use PhpParser\Node\Identifier;
 use PhpParser\Node\Name;
-use PhpParser\Node\Stmt\ClassConst;
-use PhpParser\Node\Stmt\EnumCase;
-use PhpParser\Node\Stmt\TraitUse;
 use PhpParser\Comment;
 use PhpParser\Comment\Doc;
 use PhpParser\Node;
 use PhpParser\Node\AttributeGroup;
-use PhpParser\Node\Param;
 use PhpParser\Node\Stmt\Class_;
 use PhpParser\Node\Stmt\ClassLike;
 use PhpParser\Node\Stmt\ClassMethod;
@@ -274,7 +270,7 @@ final class NoCommentsOutsideInterfaceMethodDocBlockRector extends AbstractRecto
      */
     private function stripCommentsWithCarveOut(Node $node, ?array $allowlist = null): bool
     {
-        $effective = $allowlist === null ? self::PHPSTAN_TAGS_ALLOWLIST : $allowlist;
+        $effective = $allowlist ?? self::PHPSTAN_TAGS_ALLOWLIST;
         $comments  = $node->getComments();
         if ([] === $comments) {
             return false;
